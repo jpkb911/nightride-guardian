@@ -1,0 +1,2731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>夜骑守卫 NightRide Guardian</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%2332f08c'/><path d='M12 3L5 6.8V11C5 15.7 7.8 20 12 21.2C16.2 20 19 15.7 19 11V6.8L12 3Z' stroke='%230c0c0d' stroke-width='1.3' stroke-linejoin='round' fill='none' fill-opacity='.2'/><path d='M8.5 11.5L10.5 13.5L15.5 8.5' stroke='%230c0c0d' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
+  <style>
+    @font-face {
+      font-family: 'InstrumentSans';
+      src: url('./shared/fonts/InstrumentSans-Regular.ttf') format('truetype');
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: 'InstrumentSans';
+      src: url('./shared/fonts/InstrumentSans-Bold.ttf') format('truetype');
+      font-weight: 700;
+    }
+    @font-face {
+      font-family: 'JetBrainsMono';
+      src: url('./shared/fonts/JetBrainsMono-Regular.ttf') format('truetype');
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: 'JetBrainsMono';
+      src: url('./shared/fonts/JetBrainsMono-Bold.ttf') format('truetype');
+      font-weight: 700;
+    }
+
+    /* ===== TRAE Design System Tokens ===== */
+    :root {
+      /* Background */
+      --bg: #1a1b1d;
+      --bg-card: #222427;
+      --bg-elevated: #2a2d31;
+      --bg-overlay-l1: rgba(224, 226, 242, 0.04);
+      --bg-overlay-l2: rgba(224, 226, 242, 0.06);
+      --bg-overlay-l3: rgba(224, 226, 242, 0.08);
+      --bg-overlay-l4: rgba(224, 226, 242, 0.12);
+      /* Text */
+      --ink: #d1d3db;
+      --ink-secondary: #9599a6;
+      --ink-tertiary: #666b75;
+      /* Brand */
+      --accent: #32f08c;
+      --accent-hover: #0fdc78;
+      /* Semantic */
+      --danger: #f05252;
+      --success: #32f08c;
+      --warning: #f0b432;
+      /* Border */
+      --border: rgba(224, 226, 242, 0.08);
+      --border-strong: rgba(224, 226, 242, 0.14);
+      /* Fill */
+      --fill-secondary: rgba(224, 226, 242, 0.06);
+      --fill-tertiary: rgba(224, 226, 242, 0.04);
+      --fill-quaternary: rgba(224, 226, 242, 0.02);
+      /* Typography */
+      --font: 'InstrumentSans', -apple-system, BlinkMacSystemFont, 'Noto Sans SC', system-ui, sans-serif;
+      --font-mono: 'JetBrainsMono', ui-monospace, monospace;
+      /* Radius */
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      /* Shadows */
+      --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.25), 0 0 1px rgba(50, 240, 140, 0.05);
+      --shadow-float: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.5);
+      --glow-green: 0 0 20px rgba(50, 240, 140, 0.15);
+      --glow-green-strong: 0 0 40px rgba(50, 240, 140, 0.25);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body {
+      font-family: var(--font);
+      color: var(--ink);
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(50, 240, 140, 0.03) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(50, 240, 140, 0.02) 0%, transparent 50%);
+      background-attachment: fixed;
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== Header ===== */
+    .header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-strong);
+      padding: 0 1.5rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.3;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .header-logo {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #32f08c, #0fdc78);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: var(--glow-green);
+    }
+    .header-logo svg {
+      width: 24px;
+      height: 24px;
+    }
+    .header-title {
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--ink);
+      letter-spacing: 0.5px;
+    }
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status-safe { background: rgba(50, 240, 140, 0.12); color: var(--success); }
+    .status-warn { background: rgba(240, 180, 50, 0.12); color: var(--warning); }
+    .status-danger { background: rgba(240, 82, 82, 0.12); color: var(--danger); }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .ride-timer {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--ink-secondary);
+      display: none;
+    }
+    .ride-timer.show { display: inline; }
+
+    /* ===== Main Layout ===== */
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      .main-container { grid-template-columns: 1fr; }
+    }
+
+    /* ===== Video Section ===== */
+    .video-section {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-card), var(--glow-green);
+      position: relative;
+    }
+    .video-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(50, 240, 140, 0.15), transparent);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .video-header {
+      background: var(--bg-elevated);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .video-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ink-tertiary);
+    }
+    .video-dot.recording { background: var(--danger); animation: blink 1s infinite; }
+    @keyframes blink { 50% { opacity: 0.3; } }
+    .video-header-title {
+      font-size: 14px;
+      color: var(--ink);
+      margin-left: 4px;
+      font-weight: 600;
+    }
+    .video-controls {
+      margin-left: auto;
+      display: flex;
+      gap: 6px;
+    }
+    .video-btn {
+      background: var(--bg-overlay-l3);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .video-btn:hover { background: var(--bg-overlay-l4); border-color: var(--border-strong); }
+    .video-btn.active { background: var(--accent); color: #0c0c0d; border-color: var(--accent); font-weight: 500; }
+
+    /* ===== Video Player ===== */
+    .video-wrapper {
+      position: relative;
+      background: #000;
+      aspect-ratio: 16/9;
+    }
+    #videoElement { width: 100%; height: 100%; object-fit: cover; display: none; }
+    #videoElement.active { display: block; }
+    #videoElement.mirror { transform: scaleX(-1); }
+    #canvasOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+
+    .flash-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 10; }
+    .flash-overlay.flash-slow { animation: flashAnim 1s ease-in-out 3; }
+    .flash-overlay.flash-fast { animation: flashAnimFast 0.33s ease-in-out 6; }
+    @keyframes flashAnim { 0%, 100% { opacity: 0; } 50% { opacity: 0.6; } }
+    @keyframes flashAnimFast { 0%, 100% { opacity: 0; } 50% { opacity: 0.8; } }
+
+    .video-controls-bar {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.75));
+      padding: 32px 14px 10px;
+      display: none; align-items: center; gap: 10px; z-index: 15;
+    }
+    .video-controls-bar.show { display: flex; }
+    .control-btn {
+      background: rgba(255,255,255,0.1); border: none; color: white;
+      width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+      font-size: 0.8rem; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s; flex-shrink: 0;
+    }
+    .control-btn:hover { background: rgba(255,255,255,0.2); }
+    .time-display { color: rgba(255,255,255,0.7); font-size: 11px; font-family: var(--font-mono); flex-shrink: 0; min-width: 32px; text-align: center; }
+    .progress-container { flex: 1; height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; cursor: pointer; position: relative; transition: height 0.15s; }
+    .progress-container:hover { height: 5px; }
+    .progress-bar { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.1s linear; position: relative; }
+    .progress-bar::after { content: ''; position: absolute; right: -4px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: white; border-radius: 50%; opacity: 0; transition: opacity 0.15s; }
+    .progress-container:hover .progress-bar::after { opacity: 1; }
+
+    /* ===== Upload Area ===== */
+    .upload-area {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: var(--bg-card); cursor: pointer; transition: background 0.2s;
+    }
+    .upload-area:hover { background: var(--bg-elevated); }
+    .upload-area.hidden { display: none; }
+    .upload-icon {
+      width: 64px; height: 64px; border-radius: var(--radius-lg);
+      background: var(--bg-overlay-l2);
+      border: 1.5px dashed var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 16px; color: var(--ink-secondary);
+      transition: all 0.2s;
+    }
+    .upload-area:hover .upload-icon {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(50, 240, 140, 0.04);
+    }
+    .upload-text { color: var(--ink-secondary); font-size: 14px; text-align: center; font-weight: 500; }
+    .upload-hint { color: var(--ink-tertiary); font-size: 12px; margin-top: 6px; }
+    #fileInput { display: none; }
+
+    .protocol-warning { position: absolute; top: 0; left: 0; width: 100%; background: var(--warning); color: #0c0c0d; padding: 6px 14px; font-size: 12px; text-align: center; z-index: 20; display: none; font-weight: 500; }
+    .protocol-warning.show { display: block; }
+
+    /* ===== Info Bar ===== */
+    .info-bar {
+      padding: 10px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .info-left { display: flex; align-items: center; gap: 14px; }
+    .info-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink-secondary); }
+    .info-value { font-family: var(--font-mono); color: var(--ink); font-weight: 600; font-size: 12px; }
+    .info-right { display: flex; gap: 6px; }
+    .quick-btn {
+      background: var(--bg-overlay-l3);
+      border: 1px solid var(--border);
+      color: var(--ink); padding: 4px 12px; border-radius: var(--radius-sm);
+      font-size: 12px; cursor: pointer;
+      display: flex; align-items: center; gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .quick-btn:hover { background: var(--bg-overlay-l4); }
+    .quick-btn.active { background: var(--accent); color: #0c0c0d; border-color: var(--accent); font-weight: 500; }
+
+    /* ===== Sidebar ===== */
+    .sidebar { display: flex; flex-direction: column; gap: 12px; justify-content: space-between; }
+
+    .dashboard-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      position: relative;
+    }
+    .dashboard-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(50, 240, 140, 0.1), transparent);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .card-header {
+      background: var(--bg-elevated);
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-body { padding: 14px; }
+
+    /* ===== Stats Grid ===== */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .stat-box {
+      background: var(--bg-overlay-l1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 6px 10px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
+      border-radius: 0 2px 2px 0;
+      background: var(--ink-tertiary);
+      opacity: 0.3;
+    }
+    .stat-box.safe::before { background: var(--success); opacity: 0.7; }
+    .stat-box.warn::before { background: var(--warning); opacity: 0.7; }
+    .stat-box.danger::before { background: var(--danger); opacity: 0.7; }
+    .stat-value { font-size: 28px; font-weight: 800; font-family: var(--font-mono); color: var(--ink); line-height: 1.2; }
+    .stat-value.safe { color: var(--success); text-shadow: 0 0 16px rgba(50, 240, 140, 0.35); }
+    .stat-value.warn { color: var(--warning); text-shadow: 0 0 16px rgba(240, 180, 50, 0.3); }
+    .stat-value.danger { color: var(--danger); text-shadow: 0 0 16px rgba(240, 82, 82, 0.3); }
+    .stat-label { font-size: 11px; color: var(--ink-tertiary); margin-top: 4px; }
+
+    .recent-alert {
+      background: var(--bg-overlay-l1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--ink-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .recent-alert::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--ink-tertiary);
+      flex-shrink: 0;
+    }
+
+    /* ===== Ride History ===== */
+    .ride-history { max-height: 180px; overflow-y: auto; }
+    .ride-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .ride-item:last-child { border-bottom: none; }
+    .ride-date { font-size: 13px; color: var(--ink); font-weight: 500; }
+    .ride-meta { font-size: 11px; color: var(--ink-tertiary); margin-top: 2px; }
+    .ride-score {
+      font-weight: 700; font-size: 13px; font-family: var(--font-mono);
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-overlay-l2);
+      border: 1px solid var(--border);
+    }
+    .ride-score.s { color: var(--success); border-color: rgba(50, 240, 140, 0.3); background: rgba(50, 240, 140, 0.08); }
+    .ride-score.a { color: var(--accent); border-color: rgba(50, 240, 140, 0.2); background: rgba(50, 240, 140, 0.05); }
+    .ride-score.b { color: var(--warning); border-color: rgba(240, 180, 50, 0.25); background: rgba(240, 180, 50, 0.06); }
+    .ride-score.c { color: var(--danger); border-color: rgba(240, 82, 82, 0.25); background: rgba(240, 82, 82, 0.06); }
+
+    /* ===== Action Buttons ===== */
+    .start-ride-btn {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, #32f08c 0%, #0fdc78 100%);
+      border: none; border-radius: var(--radius-md);
+      color: #0c0c0d; font-size: 16px; font-weight: 800;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      gap: 8px; transition: all 0.25s ease;
+      box-shadow: var(--glow-green), 0 2px 12px rgba(50, 240, 140, 0.2);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+    }
+    .start-ride-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transition: left 0.5s ease;
+    }
+    .start-ride-btn:hover::before {
+      left: 100%;
+    }
+    .start-ride-btn:hover {
+      box-shadow: var(--glow-green-strong), 0 4px 20px rgba(50, 240, 140, 0.3);
+      transform: translateY(-1px);
+    }
+    .start-ride-btn:active { opacity: 0.9; transform: translateY(0); box-shadow: var(--glow-green); }
+    .start-ride-btn.active {
+      background: linear-gradient(135deg, #f05252 0%, #d63a3a 100%);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(240, 82, 82, 0.15), 0 2px 12px rgba(240, 82, 82, 0.2);
+    }
+    .start-ride-btn.active:hover {
+      box-shadow: 0 0 40px rgba(240, 82, 82, 0.25), 0 4px 20px rgba(240, 82, 82, 0.3);
+    }
+
+    .ride-actions { margin-top: 0; }
+
+    .card-grow { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .card-grow .card-body { flex: 1; min-height: 0; overflow-y: auto; }
+
+    .test-alert-btn {
+      width: 100%; margin-top: 8px; padding: 10px;
+      border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+      background: var(--bg-overlay-l2); color: var(--ink-secondary);
+      cursor: pointer; font-size: 13px;
+      transition: all 0.15s ease;
+    }
+    .test-alert-btn:hover { background: var(--bg-overlay-l3); color: var(--ink); border-color: rgba(224, 226, 242, 0.2); }
+
+    /* ===== Settings Modal ===== */
+    .settings-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 200; display: none;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .settings-overlay.active { display: flex; }
+    .settings-panel {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      width: 100%; max-width: 400px; max-height: 80vh;
+      overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: var(--shadow-modal);
+    }
+    .settings-header {
+      padding: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .settings-title { font-weight: 600; font-size: 15px; color: var(--ink); }
+    .settings-close {
+      width: 26px; height: 26px; border-radius: var(--radius-sm);
+      background: var(--bg-overlay-l3); border: 1px solid var(--border);
+      color: var(--ink-secondary); font-size: 14px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .settings-close:hover { background: var(--bg-overlay-l4); color: var(--ink); }
+    .settings-body { padding: 4px 16px 16px; overflow-y: auto; }
+    .setting-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .setting-item:last-child { border-bottom: none; }
+    .setting-label { font-size: 13px; color: var(--ink); }
+    .setting-desc { font-size: 11px; color: var(--ink-tertiary); margin-top: 2px; }
+    .setting-control { display: flex; align-items: center; gap: 10px; }
+    .setting-slider {
+      width: 100px; height: 4px;
+      -webkit-appearance: none;
+      background: var(--bg-overlay-l3); border-radius: 2px; outline: none;
+    }
+    .setting-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      background: var(--accent); border-radius: 50%;
+      cursor: pointer;
+    }
+    .setting-value {
+      font-family: var(--font-mono); font-size: 12px;
+      color: var(--accent); min-width: 30px; text-align: right; font-weight: 600;
+    }
+    .setting-select {
+      background: var(--bg-overlay-l2);
+      border: 1px solid var(--border-strong);
+      color: var(--ink); padding: 5px 24px 5px 8px; border-radius: var(--radius-sm);
+      font-size: 13px; cursor: pointer; font-family: var(--font);
+      -webkit-appearance: none; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23666b75'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+
+    /* ===== Permission Error ===== */
+    .permission-error { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: var(--ink-secondary); display: none; }
+    .permission-error.show { display: block; }
+    .permission-error .icon { font-size: 2rem; margin-bottom: 10px; opacity: 0.5; }
+    .permission-error h3 { color: var(--ink); margin-bottom: 4px; font-weight: 600; font-size: 15px; }
+
+    /* ===== Loading Overlay ===== */
+    .loading-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(26,27,29,0.92);
+      display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 50;
+    }
+    .loading-overlay.active { display: flex; }
+    .loading-spinner {
+      width: 32px; height: 32px;
+      border: 2.5px solid var(--bg-overlay-l3);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin-bottom: 14px;
+      box-shadow: 0 0 12px rgba(50, 240, 140, 0.2);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: var(--ink-secondary); font-size: 13px; font-weight: 500; }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      padding: 8px 18px; border-radius: var(--radius-md);
+      font-size: 13px; z-index: 300;
+      opacity: 0; transition: all 0.25s ease;
+      box-shadow: var(--shadow-float);
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ===== Splash Screen ===== */
+    .splash {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: var(--bg);
+      animation: splashFadeOut 0.6s ease 2s forwards;
+      pointer-events: none;
+    }
+    .splash-bg {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(ellipse at 50% 50%, rgba(50, 240, 140, 0.04) 0%, transparent 60%);
+      overflow: hidden;
+    }
+    .splash-bg::before,
+    .splash-bg::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: transparent;
+      box-shadow:
+        /* Layer 1: small dim stars */
+        24px 18px 0 0.5px rgba(209,211,219,0.3),
+        87px 45px 0 0.5px rgba(209,211,219,0.25),
+        153px 32px 0 0.4px rgba(209,211,219,0.35),
+        210px 72px 0 0.5px rgba(209,211,219,0.2),
+        298px 15px 0 0.4px rgba(209,211,219,0.3),
+        340px 58px 0 0.5px rgba(209,211,219,0.25),
+        412px 28px 0 0.4px rgba(209,211,219,0.35),
+        478px 65px 0 0.5px rgba(209,211,219,0.2),
+        530px 22px 0 0.4px rgba(209,211,219,0.3),
+        595px 48px 0 0.5px rgba(209,211,219,0.25),
+        660px 12px 0 0.4px rgba(209,211,219,0.35),
+        720px 55px 0 0.5px rgba(209,211,219,0.2),
+        788px 35px 0 0.4px rgba(209,211,219,0.3),
+        850px 68px 0 0.5px rgba(209,211,219,0.25),
+        920px 20px 0 0.4px rgba(209,211,219,0.35),
+        985px 52px 0 0.5px rgba(209,211,219,0.2),
+        1050px 38px 0 0.4px rgba(209,211,219,0.3),
+        1120px 60px 0 0.5px rgba(209,211,219,0.25),
+        55px 95px 0 0.4px rgba(209,211,219,0.3),
+        130px 110px 0 0.5px rgba(209,211,219,0.2),
+        195px 88px 0 0.4px rgba(209,211,219,0.35),
+        265px 105px 0 0.5px rgba(209,211,219,0.25),
+        355px 92px 0 0.4px rgba(209,211,219,0.3),
+        430px 115px 0 0.5px rgba(209,211,219,0.2),
+        510px 85px 0 0.4px rgba(209,211,219,0.35),
+        575px 100px 0 0.5px rgba(209,211,219,0.25),
+        645px 80px 0 0.4px rgba(209,211,219,0.3),
+        715px 108px 0 0.5px rgba(209,211,219,0.2),
+        790px 90px 0 0.4px rgba(209,211,219,0.35),
+        865px 102px 0 0.5px rgba(209,211,219,0.25),
+        940px 82px 0 0.4px rgba(209,211,219,0.3),
+        1010px 98px 0 0.5px rgba(209,211,219,0.2),
+        1085px 88px 0 0.4px rgba(209,211,219,0.3),
+        1155px 105px 0 0.5px rgba(209,211,219,0.25),
+        42px 145px 0 0.4px rgba(209,211,219,0.3),
+        115px 160px 0 0.5px rgba(209,211,219,0.2),
+        180px 138px 0 0.4px rgba(209,211,219,0.35),
+        250px 155px 0 0.5px rgba(209,211,219,0.25),
+        380px 148px 0 0.4px rgba(209,211,219,0.3),
+        455px 165px 0 0.5px rgba(209,211,219,0.2),
+        545px 142px 0 0.4px rgba(209,211,219,0.35),
+        615px 158px 0 0.5px rgba(209,211,219,0.25),
+        695px 135px 0 0.4px rgba(209,211,219,0.3),
+        770px 152px 0 0.5px rgba(209,211,219,0.2),
+        845px 140px 0 0.4px rgba(209,211,219,0.35),
+        925px 162px 0 0.5px rgba(209,211,219,0.25),
+        1000px 148px 0 0.4px rgba(209,211,219,0.3),
+        1075px 155px 0 0.5px rgba(209,211,219,0.2),
+        1145px 140px 0 0.4px rgba(209,211,219,0.3);
+      animation: twinkle1 4s ease-in-out infinite alternate;
+    }
+    .splash-bg::after {
+      box-shadow:
+        /* Layer 2: brighter twinkling stars */
+        68px 38px 0 1px rgba(209,211,219,0.5),
+        175px 62px 0 0.8px rgba(209,211,219,0.45),
+        320px 25px 0 1px rgba(209,211,219,0.4),
+        490px 50px 0 0.8px rgba(209,211,219,0.5),
+        615px 30px 0 1px rgba(209,211,219,0.45),
+        745px 42px 0 0.8px rgba(209,211,219,0.4),
+        880px 18px 0 1px rgba(209,211,219,0.5),
+        1030px 45px 0 0.8px rgba(209,211,219,0.45),
+        100px 130px 0 1px rgba(209,211,219,0.4),
+        305px 120px 0 0.8px rgba(209,211,219,0.5),
+        505px 140px 0 1px rgba(209,211,219,0.45),
+        680px 128px 0 0.8px rgba(209,211,219,0.4),
+        860px 135px 0 1px rgba(209,211,219,0.5),
+        1020px 125px 0 0.8px rgba(209,211,219,0.45),
+        /* Layer 3: faint tiny stars fill */
+        15px 72px 0 0.3px rgba(209,211,219,0.15),
+        145px 8px 0 0.3px rgba(209,211,219,0.15),
+        228px 80px 0 0.3px rgba(209,211,219,0.15),
+        375px 42px 0 0.3px rgba(209,211,219,0.15),
+        555px 70px 0 0.3px rgba(209,211,219,0.15),
+        638px 15px 0 0.3px rgba(209,211,219,0.15),
+        755px 75px 0 0.3px rgba(209,211,219,0.15),
+        900px 40px 0 0.3px rgba(209,211,219,0.15),
+        1060px 25px 0 0.3px rgba(209,211,219,0.15),
+        72px 175px 0 0.3px rgba(209,211,219,0.15),
+        222px 190px 0 0.3px rgba(209,211,219,0.15),
+        442px 180px 0 0.3px rgba(209,211,219,0.15),
+        588px 195px 0 0.3px rgba(209,211,219,0.15),
+        758px 185px 0 0.3px rgba(209,211,219,0.15),
+        958px 192px 0 0.3px rgba(209,211,219,0.15),
+        1098px 178px 0 0.3px rgba(209,211,219,0.15);
+      animation: twinkle2 3s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle1 {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+    @keyframes twinkle2 {
+      0% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+    /* Cyclist float after entry */
+    .splash-cyclist {
+      width: min(320px, 60vw);
+      animation: cyclistRideIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+                 cyclistFloat 2.5s ease-in-out 1s infinite;
+      opacity: 0;
+      position: relative;
+    }
+    .splash-cyclist img {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-lg);
+      display: block;
+    }
+    @keyframes cyclistRideIn {
+      0% { opacity: 0; transform: translateX(80px) scale(0.92); }
+      30% { opacity: 0.6; }
+      100% { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    @keyframes cyclistFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .splash-brand {
+      display: flex; flex-direction: column; align-items: center;
+      margin-top: 28px;
+      animation: brandFadeIn 0.6s ease 0.5s forwards;
+      opacity: 0;
+      position: relative;
+      z-index: 1;
+    }
+    @keyframes brandFadeIn {
+      0% { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .splash-logo {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, #32f08c, #0fdc78);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 20px rgba(50, 240, 140, 0.2);
+    }
+    .splash-logo svg { width: 26px; height: 26px; }
+    .splash-title {
+      margin-top: 14px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 1px;
+    }
+    .splash-subtitle {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--ink-tertiary);
+      letter-spacing: 0.5px;
+    }
+    @keyframes splashFadeOut {
+      0% { opacity: 1; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+
+    /* ===== Scrollbar ===== */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg-overlay-l3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--bg-overlay-l4); }
+  </style>
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="splash" class="splash">
+    <div class="splash-bg"></div>
+
+    <div class="splash-cyclist">
+      <img src="splash-cyclist.jpg" alt="Night Rider" draggable="false"/>
+    </div>
+    <div class="splash-brand">
+      <div class="splash-logo">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3L5 6.8V11C5 15.7 7.8 20 12 21.2C16.2 20 19 15.7 19 11V6.8L12 3Z" fill="#0c0c0d" fill-opacity="0.2"/>
+          <path d="M12 3L5 6.8V11C5 15.7 7.8 20 12 21.2C16.2 20 19 15.7 19 11V6.8L12 3Z" stroke="#0c0c0d" stroke-width="1.3" stroke-linejoin="round" fill="none"/>
+          <path d="M8.5 11.5L10.5 13.5L15.5 8.5" stroke="#0c0c0d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="splash-title">夜骑守卫</div>
+      <div class="splash-subtitle">NightRide Guardian</div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="header-logo">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3L5 6.8V11C5 15.7 7.8 20 12 21.2C16.2 20 19 15.7 19 11V6.8L12 3Z" fill="#0c0c0d" fill-opacity="0.2"/>
+          <path d="M12 3L5 6.8V11C5 15.7 7.8 20 12 21.2C16.2 20 19 15.7 19 11V6.8L12 3Z" stroke="#0c0c0d" stroke-width="1.3" stroke-linejoin="round" fill="none"/>
+          <path d="M8.5 11.5L10.5 13.5L15.5 8.5" stroke="#0c0c0d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <span class="header-title">夜骑守卫 NightRide Guardian</span>
+    </div>
+    <div class="header-status">
+      <div id="statusBadge" class="status-badge status-safe">
+        <span class="status-dot"></span>
+        <span id="statusText">安全</span>
+      </div>
+      <div id="rideTimer" class="ride-timer">00:00:00</div>
+      <button class="video-btn" id="settingsBtn">设置</button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-container">
+
+    <!-- Left: Video Section -->
+    <section class="video-section">
+      <div class="video-header">
+        <div id="recDot" class="video-dot"></div>
+        <span class="video-header-title">实时监测画面</span>
+        <div class="video-controls">
+          <button class="video-btn" id="uploadBtn">上传视频</button>
+          <button class="video-btn" id="cameraBtn">摄像头</button>
+        </div>
+      </div>
+      <div class="video-wrapper">
+        <video id="videoElement" autoplay playsinline muted loop></video>
+        <canvas id="canvasOverlay"></canvas>
+        <div id="flashOverlay" class="flash-overlay"></div>
+        <div id="videoControls" class="video-controls-bar">
+          <button id="playPauseBtn" class="control-btn">⏸️</button>
+          <span id="currentTime" class="time-display">00:00</span>
+          <div id="progressContainer" class="progress-container">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <span id="duration" class="time-display">00:00</span>
+        </div>
+        <div id="protocolWarning" class="protocol-warning">
+          ⚠️ 请通过 HTTP 服务器访问（http://localhost:3456），否则摄像头和视频功能可能无法正常工作
+        </div>
+
+        <div id="uploadArea" class="upload-area">
+          <div class="upload-icon">🎥</div>
+          <div class="upload-text">点击上传视频文件或使用摄像头</div>
+          <div class="upload-hint">支持 MP4, WebM 格式 | 建议使用后置摄像头</div>
+        </div>
+        <input type="file" id="fileInput" accept="video/*">
+
+        <div id="permissionError" class="permission-error">
+          <div class="icon">📷</div>
+          <h3>无法访问摄像头</h3>
+          <p>请在浏览器设置中允许摄像头权限</p>
+        </div>
+
+        <div id="loadingOverlay" class="loading-overlay">
+          <div class="loading-spinner"></div>
+          <div class="loading-text" id="loadingText">正在加载模型...</div>
+        </div>
+      </div>
+
+      <div class="info-bar">
+        <div class="info-left">
+          <div class="info-item">
+            <span>🎯</span>
+            <span>检测目标:</span>
+            <span class="info-value" id="detectedCount">0</span>
+          </div>
+          <div class="info-item">
+            <span>⚡</span>
+            <span>FPS:</span>
+            <span class="info-value" id="fpsDisplay">--</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Sidebar -->
+    <aside class="sidebar">
+
+      <!-- Dashboard -->
+      <div class="dashboard-card">
+        <div class="card-header">安全仪表盘</div>
+        <div class="card-body">
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-value safe" id="currentStatusValue">安全</div>
+              <div class="stat-label">当前状态</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="alertCountValue">0</div>
+              <div class="stat-label">预警次数</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="safetyScoreValue">S</div>
+              <div class="stat-label">安全评分</div>
+            </div>
+          </div>
+          <div class="recent-alert" id="recentAlert">
+            <div>最近预警: <span id="lastAlertTime">--</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ride History -->
+      <div class="dashboard-card card-grow">
+        <div class="card-header">骑行记录</div>
+        <div class="card-body ride-history" id="rideHistory">
+          <div style="text-align: center; padding: 1rem; color: var(--muted); font-size: 0.8rem;">
+            暂无骑行记录
+          </div>
+        </div>
+      </div>
+
+      <!-- Start/End Ride -->
+      <div class="ride-actions">
+        <button id="startRideBtn" class="start-ride-btn">
+          开始骑行
+        </button>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- Settings Panel -->
+  <div id="settingsOverlay" class="settings-overlay">
+    <div class="settings-panel">
+      <div class="settings-header">
+        <span class="settings-title">设置</span>
+        <button class="settings-close" id="settingsClose">&times;</button>
+      </div>
+      <div class="settings-body">
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">检测灵敏度</div>
+            <div class="setting-desc">置信度阈值，越低越敏感</div>
+          </div>
+          <div class="setting-control">
+            <input type="range" class="setting-slider" id="sensitivitySlider" min="20" max="80" value="50">
+            <span class="setting-value" id="sensitivityValue">50%</span>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">预警音量</div>
+          </div>
+          <div class="setting-control">
+            <input type="range" class="setting-slider" id="volumeSlider" min="0" max="100" value="80">
+            <span class="setting-value" id="volumeValue">80%</span>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">闪光灯模式</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select" id="flashModeSelect">
+              <option value="all">全部预警</option>
+              <option value="danger">仅危险级</option>
+              <option value="off">关闭</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">语音语言</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select" id="languageSelect">
+              <option value="zh-CN">中文</option>
+              <option value="en-US">English</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div>
+            <div class="setting-label">预警冷却时间</div>
+            <div class="setting-desc">防止重复播报</div>
+          </div>
+          <div class="setting-control">
+            <select class="setting-select" id="cooldownSelect">
+              <option value="3">3秒</option>
+              <option value="5">5秒</option>
+              <option value="8" selected>8秒</option>
+              <option value="10">10秒</option>
+              <option value="15">15秒</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- SVG Filters for night vision gamma correction (GPU-accelerated, zero CPU cost) -->
+  <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+    <defs>
+      <filter id="gamma-mid">
+        <feComponentTransfer>
+          <feFuncR type="gamma" amplitude="1" exponent="0.55" offset="0"/>
+          <feFuncG type="gamma" amplitude="1" exponent="0.55" offset="0"/>
+          <feFuncB type="gamma" amplitude="1" exponent="0.55" offset="0"/>
+        </feComponentTransfer>
+      </filter>
+      <filter id="gamma-strong">
+        <feComponentTransfer>
+          <feFuncR type="gamma" amplitude="1" exponent="0.4" offset="0"/>
+          <feFuncG type="gamma" amplitude="1" exponent="0.4" offset="0"/>
+          <feFuncB type="gamma" amplitude="1" exponent="0.4" offset="0"/>
+        </feComponentTransfer>
+      </filter>
+      <filter id="headlight-tone">
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues="0,0.22,0.45,0.62,0.75,0.84,0.90,0.94,0.96"/>
+          <feFuncG type="table" tableValues="0,0.22,0.45,0.62,0.75,0.84,0.90,0.94,0.96"/>
+          <feFuncB type="table" tableValues="0,0.22,0.45,0.62,0.75,0.84,0.90,0.94,0.96"/>
+        </feComponentTransfer>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- TensorFlow.js and COCO-SSD -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+
+  <script>
+    // ===== Splash Screen =====
+    setTimeout(() => {
+      const splash = document.getElementById('splash');
+      if (splash) splash.remove();
+    }, 2800);
+
+    // ===== DOM Helpers =====
+    const $ = (id) => document.getElementById(id);
+
+    // ===== DOM Elements =====
+    const video = $('videoElement');
+    const canvas = $('canvasOverlay');
+    const ctx = canvas.getContext('2d');
+    const uploadArea = $('uploadArea');
+    const fileInput = $('fileInput');
+    const uploadBtn = $('uploadBtn');
+    const cameraBtn = $('cameraBtn');
+    const permissionError = $('permissionError');
+    const loadingOverlay = $('loadingOverlay');
+    const loadingText = $('loadingText');
+    const flashOverlay = $('flashOverlay');
+    const protocolWarning = $('protocolWarning');
+    const videoControls = $('videoControls');
+    const playPauseBtn = $('playPauseBtn');
+    const currentTimeEl = $('currentTime');
+    const durationEl = $('duration');
+    const progressContainer = $('progressContainer');
+    const progressBar = $('progressBar');
+
+    const fpsDisplay = $('fpsDisplay');
+    const detectedCount = $('detectedCount');
+    const statusBadge = $('statusBadge');
+    const statusText = $('statusText');
+    const currentStatusValue = $('currentStatusValue');
+    const alertCountValue = $('alertCountValue');
+    const safetyScoreValue = $('safetyScoreValue');
+    const lastAlertTime = $('lastAlertTime');
+    const recDot = $('recDot');
+    const rideTimer = $('rideTimer');
+
+    // 离屏检测canvas：裁剪画面下半部分用于检测
+    const detectCanvas = document.createElement('canvas');
+    const detectCtx = detectCanvas.getContext('2d', { willReadFrequently: false });
+
+    // Bright-spot detection canvas (low-res for performance) — detects vehicle headlights at night
+    const spotCanvas = document.createElement('canvas');
+    const spotCtx = spotCanvas.getContext('2d', { willReadFrequently: true });
+    const SPOT_W = 240;
+    const SPOT_H = 135;
+    spotCanvas.width = SPOT_W;
+    spotCanvas.height = SPOT_H;
+
+    const startRideBtn = $('startRideBtn');
+
+    const settingsBtn = $('settingsBtn');
+    const settingsOverlay = $('settingsOverlay');
+    const settingsClose = $('settingsClose');
+    const sensitivitySlider = $('sensitivitySlider');
+    const sensitivityValue = $('sensitivityValue');
+    const volumeSlider = $('volumeSlider');
+    const volumeValue = $('volumeValue');
+    const flashModeSelect = $('flashModeSelect');
+    const languageSelect = $('languageSelect');
+    const cooldownSelect = $('cooldownSelect');
+
+    const toast = $('toast');
+    const rideHistoryEl = $('rideHistory');
+
+    // ===== State =====
+    const state = {
+      isRiding: false,
+      isModelLoaded: false,
+      isDetecting: false,
+      isStreamStarting: false,
+      videoMode: null,
+      facingMode: 'environment',
+      justClosedMedia: false,
+      voiceEnabled: false,
+      flashEnabled: false,
+      model: null,
+      alerts: [],
+      rideStartTime: null,
+      rideTimerInterval: null,
+      rideHistory: JSON.parse(localStorage.getItem('rideHistory') || '[]'),
+      dangerAlertCount: 0,
+      totalAlertCount: 0,
+      lastAlertTime: 0,
+      lastAlertLevel: null,
+      frameCount: 0,
+      lastFpsTime: Date.now(),
+      currentFps: 0,
+      previousAreas: [],
+      lastDangerCheck: 0,
+      flashStopTimer: null,
+      flashActive: false,
+      currentBlobUrl: null,
+      trackedDetections: [],
+      detectionHistory: [],
+      lastPredictions: [],
+      detectChannelToggle: false,
+      detectBusy: false,
+      detectionInterval: null,
+      prevChannelPredictions: null,
+    };
+
+    // ===== Settings =====
+    const settings = JSON.parse(localStorage.getItem('settings') || JSON.stringify({
+      sensitivity: 50,
+      volume: 80,
+      flashMode: 'all',
+      language: 'zh-CN',
+      cooldown: 8,
+    }));
+
+    // ===== COCO Target Classes =====
+    const TARGET_CLASSES = ['person', 'bicycle', 'car', 'motorcycle'];
+    const COCO_CLASSES = {
+      'person': { color: '#22c55e', label: '行人', threshold: 0.35 },
+      'bicycle': { color: '#06b6d4', label: '自行车', threshold: 0.04 },
+      'car': { color: '#ef4444', label: '汽车', threshold: 0.15 },
+      'motorcycle': { color: '#f59e0b', label: '摩托车/电动车', threshold: 0.03 },
+    };
+
+    function iou(box1, box2) {
+      const [x1, y1, w1, h1] = box1;
+      const [x2, y2, w2, h2] = box2;
+      const xi1 = Math.max(x1, x2);
+      const yi1 = Math.max(y1, y2);
+      const xi2 = Math.min(x1 + w1, x2 + w2);
+      const yi2 = Math.min(y1 + h1, y2 + h2);
+      const inter = Math.max(0, xi2 - xi1) * Math.max(0, yi2 - yi1);
+      const area1 = w1 * h1;
+      const area2 = w2 * h2;
+      const union = area1 + area2 - inter;
+      return union > 0 ? inter / union : 0;
+    }
+
+    function smoothDetections(currentDets, frameHeight) {
+      const now = Date.now();
+      const maxAge = 800;
+
+      state.trackedDetections = state.trackedDetections.filter(t => now - t.lastSeen < maxAge);
+
+      currentDets.forEach(det => {
+        const [, y, , h] = det.bbox;
+        const centerY = y + h / 2;
+        const isInLowerArea = centerY > frameHeight * 0.20;
+        if (!isInLowerArea) return;
+
+        const area = det.bbox[2] * det.bbox[3];
+        const isTwoWheeler = det.class === 'bicycle' || det.class === 'motorcycle';
+        const matchIoU = isTwoWheeler ? 0.02 : 0.15;
+        // growthRate threshold per second: area must grow by this fraction per second
+        // For two-wheelers: 10%/sec growth = approaching (sensitive enough for distant vehicles)
+        const approachThreshold = isTwoWheeler ? 0.10 : 0.30;
+
+        let matched = null;
+        let bestIoU = 0;
+        state.trackedDetections.forEach(t => {
+          if (t.class === det.class) {
+            const i = iou(t.bbox, det.bbox);
+            if (i > matchIoU && i > bestIoU) {
+              bestIoU = i;
+              matched = t;
+            }
+          }
+        });
+
+        if (matched) {
+          const alpha = isTwoWheeler ? 0.4 : 0.5;
+          const oldCenterY = matched.bbox[1] + matched.bbox[3] / 2;
+          matched.bbox = [
+            matched.bbox[0] * (1 - alpha) + det.bbox[0] * alpha,
+            matched.bbox[1] * (1 - alpha) + det.bbox[1] * alpha,
+            matched.bbox[2] * (1 - alpha) + det.bbox[2] * alpha,
+            matched.bbox[3] * (1 - alpha) + det.bbox[3] * alpha,
+          ];
+          const newCenterY = matched.bbox[1] + matched.bbox[3] / 2;
+          // Track cumulative vertical displacement for direction detection
+          matched.dyTotal = (matched.dyTotal || 0) + (newCenterY - oldCenterY);
+          matched.scoreHistory = matched.scoreHistory || [];
+          matched.scoreHistory.push(det.score);
+          if (matched.scoreHistory.length > 6) matched.scoreHistory.shift();
+          const avgScore = matched.scoreHistory.reduce((a, b) => a + b, 0) / matched.scoreHistory.length;
+          matched.score = Math.max(det.score, avgScore);
+          matched.lastSeen = now;
+          matched.missed = 0;
+          matched.hitCount = (matched.hitCount || 0) + 1;
+          matched.velocity = null;
+          matched.areaHistory.push({ time: now, area: area, bbox: [...det.bbox] });
+          if (matched.areaHistory.length > 8) {
+            matched.areaHistory.shift();
+          }
+          if (matched.areaHistory.length >= 3) {
+            // Calculate growth rate as fractional area increase PER SECOND (not per frame)
+            const recent = matched.areaHistory.slice(-5);
+            const first = recent[0].area;
+            const last = recent[recent.length - 1].area;
+            const timeSpan = recent[recent.length - 1].time - recent[0].time;
+            if (first > 0 && timeSpan > 150) {
+              matched.growthRate = (last - first) / first / (timeSpan / 1000);
+            }
+            // Calculate net vertical displacement over the recent window (not cumulative forever)
+            // Use center Y of bbox: approaching = moving DOWN (positive dy)
+            const recentDy = recent[recent.length - 1].bbox[1] + recent[recent.length - 1].bbox[3] / 2
+                           - (recent[0].bbox[1] + recent[0].bbox[3] / 2);
+            if (matched.areaHistory.length >= 4) {
+              const prev = matched.areaHistory[matched.areaHistory.length - 2];
+              const curr = matched.areaHistory[matched.areaHistory.length - 1];
+              const dt = Math.max(1, curr.time - prev.time);
+              matched.velocity = [
+                (curr.bbox[0] - prev.bbox[0]) / dt,
+                (curr.bbox[1] - prev.bbox[1]) / dt,
+                (curr.bbox[2] - prev.bbox[2]) / dt,
+                (curr.bbox[3] - prev.bbox[3]) / dt,
+              ];
+            }
+            // Require BOTH area growth AND DOWNWARD movement in recent window for two-wheelers
+            // Approaching from behind: area grows AND center moves DOWN in frame (toward camera)
+            // Roadside stopped vehicles: as rider passes, they shrink and move UP (away)
+            if (isTwoWheeler) {
+              // Hysteresis: once marked approaching, keep it with lower threshold to avoid flicker
+              const prevApproaching = matched.isApproaching;
+              // For first detection: need clear downward movement + area growth
+              // For already-approaching: relax thresholds to maintain lock
+              const dyThreshold = prevApproaching ? 0 : 2;
+              const grThreshold = prevApproaching ? approachThreshold * 0.4 : approachThreshold;
+              const isMovingDown = recentDy > dyThreshold;
+              const isGrowing = matched.growthRate > grThreshold;
+              if (isGrowing && isMovingDown) {
+                matched.isApproaching = true;
+              } else if (!prevApproaching) {
+                matched.isApproaching = false;
+              }
+              // If approaching for too long without growth, clear it (vehicle passed or stopped)
+              if (matched.isApproaching && matched.growthRate < -0.1) {
+                matched.isApproaching = false;
+              }
+            } else {
+              matched.isApproaching = matched.growthRate > approachThreshold;
+            }
+          }
+          const confirmFrames = isTwoWheeler ? 1 : 2;
+          matched.confirmed = matched.hitCount >= confirmFrames;
+        } else {
+          state.trackedDetections.push({
+            class: det.class,
+            bbox: [...det.bbox],
+            score: det.score,
+            scoreHistory: [det.score],
+            lastSeen: now,
+            missed: 0,
+            hitCount: 1,
+            confirmed: false,
+            areaHistory: [{ time: now, area: area, bbox: [...det.bbox] }],
+            growthRate: 0,
+            isApproaching: false,
+            interpolatedFrames: 0,
+            velocity: null,
+            dyTotal: 0,
+            thisFrameDetected: true,
+          });
+        }
+      });
+
+      state.trackedDetections.forEach(t => {
+        t.thisFrameDetected = false;
+      });
+      currentDets.forEach(det => {
+        state.trackedDetections.forEach(t => {
+          if (t.class === det.class && iou(t.bbox, det.bbox) > (t.class === 'bicycle' || t.class === 'motorcycle' ? 0.03 : 0.15)) {
+            t.thisFrameDetected = true;
+          }
+        });
+      });
+
+      state.trackedDetections.forEach(t => {
+        const isTwoWheeler = t.class === 'bicycle' || t.class === 'motorcycle';
+        const matchIoU = isTwoWheeler ? 0.03 : 0.15;
+        const found = currentDets.find(d => d.class === t.class && iou(d.bbox, t.bbox) > matchIoU);
+        if (!found) {
+          t.missed++;
+          if (isTwoWheeler && t.confirmed && t.missed <= 3 && t.velocity && t.areaHistory.length >= 2) {
+            const dt = 120;
+            t.bbox = [
+              t.bbox[0] + t.velocity[0] * dt,
+              t.bbox[1] + t.velocity[1] * dt,
+              Math.max(5, t.bbox[2] + t.velocity[2] * dt),
+              Math.max(5, t.bbox[3] + t.velocity[3] * dt),
+            ];
+            t._interpolated = true;
+            t.interpolatedFrames = (t.interpolatedFrames || 0) + 1;
+          }
+        } else {
+          t.interpolatedFrames = 0;
+          t._interpolated = false;
+        }
+      });
+
+      return state.trackedDetections
+        .filter(t => {
+          const isTwoWheeler = t.class === 'bicycle' || t.class === 'motorcycle';
+          const maxMissed = isTwoWheeler ? 6 : 3;
+          if (!t.confirmed) return false;
+          if (t.missed >= maxMissed) return false;
+          if (t._interpolated && !t.thisFrameDetected && t.missed > 2) return false;
+          return true;
+        })
+        .map(t => ({
+          class: t.class,
+          bbox: t.bbox,
+          score: t.score,
+          isApproaching: t.isApproaching,
+          growthRate: t.growthRate,
+        }));
+    }
+
+    // ===== Utility Functions =====
+    function showToast(msg, duration = 2500) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), duration);
+    }
+
+    function formatTime(ms) {
+      const d = new Date(ms);
+      return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    function formatDuration(ms) {
+      const s = Math.floor(ms / 1000);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    }
+
+    function formatVideoTime(seconds) {
+      if (isNaN(seconds) || !isFinite(seconds)) return '00:00';
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function resizeCanvas() {
+      const rect = video.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+
+    // ===== Settings Initialization =====
+    function initSettings() {
+      sensitivitySlider.value = settings.sensitivity;
+      sensitivityValue.textContent = settings.sensitivity + '%';
+      volumeSlider.value = settings.volume;
+      volumeValue.textContent = settings.volume + '%';
+      flashModeSelect.value = settings.flashMode;
+      languageSelect.value = settings.language;
+      cooldownSelect.value = settings.cooldown;
+
+      // Protocol check
+      if (location.protocol === 'file:') {
+        protocolWarning.classList.add('show');
+      }
+    }
+
+    function saveSettings() {
+      localStorage.setItem('settings', JSON.stringify(settings));
+    }
+
+    // ===== Settings Event Listeners =====
+    settingsBtn.addEventListener('click', () => settingsOverlay.classList.add('active'));
+    settingsClose.addEventListener('click', () => settingsOverlay.classList.remove('active'));
+    settingsOverlay.addEventListener('click', (e) => {
+      if (e.target === settingsOverlay) settingsOverlay.classList.remove('active');
+    });
+
+    sensitivitySlider.addEventListener('input', () => {
+      settings.sensitivity = parseInt(sensitivitySlider.value);
+      sensitivityValue.textContent = settings.sensitivity + '%';
+      saveSettings();
+    });
+
+    volumeSlider.addEventListener('input', () => {
+      settings.volume = parseInt(volumeSlider.value);
+      volumeValue.textContent = settings.volume + '%';
+      saveSettings();
+    });
+
+    flashModeSelect.addEventListener('change', () => {
+      settings.flashMode = flashModeSelect.value;
+      if (settings.flashMode === 'off') {
+        state.flashEnabled = false;
+        stopFlash(true);
+      } else if (state.isRiding) {
+        state.flashEnabled = true;
+      }
+      saveSettings();
+    });
+
+    languageSelect.addEventListener('change', () => {
+      settings.language = languageSelect.value;
+      saveSettings();
+    });
+
+    cooldownSelect.addEventListener('change', () => {
+      settings.cooldown = parseInt(cooldownSelect.value);
+      saveSettings();
+    });
+
+    // ===== Video Controls =====
+    playPauseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (state.videoMode !== 'upload') return;
+      if (video.paused) {
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    });
+
+    progressContainer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (state.videoMode !== 'upload' || !video.duration) return;
+      const rect = progressContainer.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      video.currentTime = pos * video.duration;
+    });
+
+    // ===== Model Loading =====
+    async function loadModel() {
+      loadingOverlay.classList.add('active');
+      loadingText.textContent = '正在加载高精度 AI 检测模型...';
+      try {
+        state.model = await cocoSsd.load({
+          base: 'mobilenet_v2'
+        });
+        state.isModelLoaded = true;
+        loadingText.textContent = '模型加载完成';
+        setTimeout(() => loadingOverlay.classList.remove('active'), 500);
+        showToast('✅ 高精度检测模型加载完成');
+      } catch (err) {
+        console.error('Model loading error:', err);
+        loadingText.textContent = '模型加载失败，请刷新重试';
+        showToast('❌ 模型加载失败，尝试加载轻量版...');
+        try {
+          state.model = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
+          state.isModelLoaded = true;
+          setTimeout(() => loadingOverlay.classList.remove('active'), 500);
+          showToast('✅ 轻量检测模型加载完成');
+        } catch (err2) {
+          loadingText.textContent = '模型加载失败，请刷新重试';
+          showToast('❌ 模型加载失败');
+        }
+      }
+    }
+
+    // ===== File Upload =====
+    uploadArea.addEventListener('click', (e) => {
+      if (state.justClosedMedia) return;
+      if (state.videoMode === 'upload') {
+        e.stopPropagation();
+        stopDetection();
+        uploadBtn.textContent = '上传视频';
+        uploadBtn.classList.remove('active');
+        return;
+      }
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', handleFileSelect);
+
+    uploadBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (state.videoMode === 'upload') {
+        stopDetection();
+        uploadBtn.textContent = '上传视频';
+        uploadBtn.classList.remove('active');
+        return;
+      }
+      if (!state.justClosedMedia) {
+        fileInput.click();
+      }
+    });
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('video/')) {
+        showToast('❌ 请选择视频文件');
+        fileInput.value = '';
+        return;
+      }
+
+      // Stop current detection but keep old blob URL until new one loads
+      const oldBlobUrl = state.currentBlobUrl;
+      if (state.isDetecting) {
+        state.isDetecting = false;
+        state.justClosedMedia = true;
+        setTimeout(() => { state.justClosedMedia = false; }, 300);
+        speechSynthesis.cancel();
+        stopFlash(true);
+        updateStatus('safe');
+        // Properly release old blob: remove listeners → pause → clear src → load
+        // This prevents ERR_ABORTED when video.src is overwritten while old blob is still loading
+        video.onloadeddata = null;
+        video.ontimeupdate = null;
+        video.onplay = null;
+        video.onpause = null;
+        video.onerror = null;
+        video.onabort = null;
+        video.onwaiting = null;
+        video.onstalled = null;
+        video.onended = null;
+        video.pause();
+        if (oldBlobUrl) {
+          video.removeAttribute('src');
+          video.load();
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        detectedCount.textContent = '0';
+        fpsDisplay.textContent = '--';
+      }
+
+      const url = URL.createObjectURL(file);
+
+      video.onloadeddata = () => {
+        video.classList.add('active');
+        uploadArea.classList.add('hidden');
+        videoControls.classList.add('show');
+        durationEl.textContent = formatVideoTime(video.duration);
+        resizeCanvas();
+        state.currentBlobUrl = url;
+        state.videoMode = 'upload';
+        state.trackedDetections = [];
+        state.previousAreas = [];
+        state.lastDangerCheck = 0;
+        startDetection();
+        showToast('✅ 视频已加载，开始检测');
+      };
+
+      video.ontimeupdate = () => {
+        const progress = (video.currentTime / video.duration) * 100;
+        progressBar.style.width = progress + '%';
+        currentTimeEl.textContent = formatVideoTime(video.currentTime);
+      };
+
+      video.onplay = () => {
+        playPauseBtn.textContent = '⏸️';
+      };
+
+      video.onpause = () => {
+        playPauseBtn.textContent = '▶️';
+      };
+
+      video.onerror = (err) => {
+      };
+
+      video.onabort = () => {
+      };
+
+      video.onwaiting = () => {
+        video.play().catch(() => {});
+      };
+
+      video.onstalled = () => {
+        video.play().catch(() => {});
+      };
+
+      video.onended = () => {
+        video.currentTime = 0;
+        video.play().catch(() => {});
+      };
+
+      // Old blob URL is no longer referenced by video element (src was cleared above);
+      // safe to revoke now with a short delay to let any pending browser refs drain
+      if (oldBlobUrl && oldBlobUrl !== url) {
+        setTimeout(() => URL.revokeObjectURL(oldBlobUrl), 200);
+      }
+
+      video.src = url;
+      video.load();
+      video.play().catch(() => {});
+
+      uploadBtn.textContent = '关闭视频';
+        uploadBtn.classList.add('active');
+        cameraBtn.classList.remove('active');
+        cameraBtn.textContent = '摄像头';
+      permissionError.classList.remove('show');
+      fileInput.value = '';
+    }
+
+    // ===== Camera =====
+    cameraBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+
+      if (state.videoMode === 'camera') {
+        stopDetection();
+        cameraBtn.textContent = '摄像头';
+        cameraBtn.classList.remove('active');
+        showToast('摄像头已关闭');
+        return;
+      }
+
+      if (state.isStreamStarting) return;
+
+      if (!state.isModelLoaded) {
+        showToast('⏳ 模型正在加载中，请稍候');
+        return;
+      }
+
+      startCamera();
+    });
+
+    async function startCamera() {
+      state.isStreamStarting = true;
+      loadingOverlay.classList.add('active');
+      loadingText.textContent = '正在启动摄像头...';
+      permissionError.classList.remove('show');
+
+      try {
+        // 清理现有流
+        if (video.srcObject) {
+          video.srcObject.getTracks().forEach(t => t.stop());
+          video.srcObject = null;
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: state.facingMode,
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false
+        });
+
+        video.srcObject = stream;
+
+        video.onloadedmetadata = () => {
+          video.classList.add('active');
+          uploadArea.classList.add('hidden');
+
+          // 前置摄像头镜像
+          if (state.facingMode === 'user') {
+            video.classList.add('mirror');
+          } else {
+            video.classList.remove('mirror');
+          }
+
+          video.play().then(() => {
+            resizeCanvas();
+            startDetection();
+            loadingOverlay.classList.remove('active');
+            state.videoMode = 'camera';
+            cameraBtn.textContent = '关闭摄像头';
+            cameraBtn.classList.add('active');
+            uploadBtn.classList.remove('active');
+            uploadBtn.textContent = '上传视频';
+            showToast('摄像头已启动');
+          }).catch(err => {
+            console.error('Play error:', err);
+            loadingOverlay.classList.remove('active');
+            stream.getTracks().forEach(t => t.stop());
+          });
+        };
+
+      } catch (err) {
+        console.error('Camera error:', err);
+        loadingOverlay.classList.remove('active');
+        permissionError.classList.add('show');
+        showToast('❌ 无法访问摄像头，请检查权限');
+      } finally {
+        state.isStreamStarting = false;
+      }
+    }
+
+    // ===== Detection Control =====
+    function startDetection() {
+      if (state.isDetecting) return;
+      state.isDetecting = true;
+      state.previousAreas = [];
+      state.lastDangerCheck = 0;
+      state.trackedDetections = [];
+      state.lastPredictions = [];
+      state.detectChannelToggle = false;
+      state.detectBusy = false;
+      state.prevChannelPredictions = null;
+      renderFrame();
+      state.detectionInterval = setInterval(runDetection, 120);
+    }
+
+    function stopDetection() {
+      state.isDetecting = false;
+      state.justClosedMedia = true;
+      setTimeout(() => { state.justClosedMedia = false; }, 300);
+
+      // 停止检测时如果正在骑行，自动结束骑行
+      if (state.isRiding) {
+        endRide();
+      }
+
+      if (state.detectionInterval) {
+        clearInterval(state.detectionInterval);
+        state.detectionInterval = null;
+      }
+      state.lastPredictions = [];
+      state.detectBusy = false;
+
+      // 取消所有语音
+      speechSynthesis.cancel();
+
+      // 停止摄像头流
+      if (video.srcObject && state.videoMode === 'camera') {
+        video.srcObject.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+      }
+
+      // 清理上传的视频 - 不立即释放Blob URL，避免循环播放/seek时ERR_ABORTED
+      if (state.currentBlobUrl) {
+        video.pause();
+        video.onloadeddata = null;
+        video.onerror = null;
+        video.onabort = null;
+        video.onloadedmetadata = null;
+        video.onended = null;
+        video.ontimeupdate = null;
+        video.onplay = null;
+        video.onpause = null;
+        video.onwaiting = null;
+        video.onstalled = null;
+        video.removeAttribute('src');
+        video.load();
+      }
+
+      video.onloadeddata = null;
+      video.onerror = null;
+      video.onabort = null;
+      video.onloadedmetadata = null;
+      video.onended = null;
+      video.ontimeupdate = null;
+      video.onplay = null;
+      video.onpause = null;
+      video.onwaiting = null;
+      video.onstalled = null;
+
+      video.classList.remove('active', 'mirror');
+      uploadArea.classList.remove('hidden');
+      videoControls.classList.remove('show');
+      progressBar.style.width = '0%';
+      currentTimeEl.textContent = '00:00';
+      durationEl.textContent = '00:00';
+      playPauseBtn.textContent = '⏸️';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 停止闪光
+      stopFlash(true);
+      updateStatus('safe');
+
+      state.videoMode = null;
+      state.trackedDetections = [];
+      detectedCount.textContent = '0';
+      fpsDisplay.textContent = '--';
+    }
+
+    // ===== Render Loop (per-frame, no inference) =====
+    function renderFrame() {
+      if (!state.isDetecting || !state.model) {
+        requestAnimationFrame(renderFrame);
+        return;
+      }
+
+      if (!video.videoWidth || !video.videoHeight || video.readyState < 2) {
+        requestAnimationFrame(renderFrame);
+        return;
+      }
+
+      // 确保 canvas 尺寸正确
+      const rect = video.getBoundingClientRect();
+      if (canvas.width !== rect.width || canvas.height !== rect.height) {
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+      }
+
+      // FPS calculation
+      state.frameCount++;
+      const now = Date.now();
+      if (now - state.lastFpsTime >= 1000) {
+        state.currentFps = state.frameCount;
+        state.frameCount = 0;
+        state.lastFpsTime = now;
+        fpsDisplay.textContent = state.currentFps;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const videoRatio = video.videoWidth / video.videoHeight;
+      const canvasRatio = canvas.width / canvas.height;
+      let scale, offsetX = 0, offsetY = 0;
+
+      if (videoRatio > canvasRatio) {
+        scale = canvas.height / video.videoHeight;
+        const scaledWidth = video.videoWidth * scale;
+        offsetX = (canvas.width - scaledWidth) / 2;
+      } else {
+        scale = canvas.width / video.videoWidth;
+        const scaledHeight = video.videoHeight * scale;
+        offsetY = (canvas.height - scaledHeight) / 2;
+      }
+
+      const allVehicles = state.lastPredictions;
+      // Only show vehicles that are actively approaching (moving closer, area growing)
+      const vehicles = allVehicles.filter(v => v.isApproaching);
+
+      vehicles.forEach(pred => {
+        const [x, y, w, h] = pred.bbox;
+        const cls = COCO_CLASSES[pred.class];
+
+        const sx = x * scale + offsetX;
+        const sy = y * scale + offsetY;
+        const sw = w * scale;
+        const sh = h * scale;
+
+        let drawX = sx;
+        if (state.facingMode === 'user' && state.videoMode === 'camera') {
+          drawX = canvas.width - sx - sw;
+        }
+
+        ctx.strokeStyle = cls.color;
+        ctx.lineWidth = 4;
+        ctx.globalAlpha = 1;
+        ctx.strokeRect(drawX, sy, sw, sh);
+        ctx.globalAlpha = 1;
+
+        const label = cls.label + ' ⚠️靠近';
+        ctx.font = 'bold 13px InstrumentSans, sans-serif';
+        const textWidth = ctx.measureText(label).width;
+        ctx.fillStyle = cls.color;
+        ctx.fillRect(drawX, sy - 20, textWidth + 10, 20);
+        ctx.fillStyle = '#000';
+        ctx.fillText(label, drawX + 5, sy - 5);
+      });
+
+      const approachingVehicles = vehicles;
+      detectedCount.textContent = approachingVehicles.length;
+
+      if (now - state.lastDangerCheck >= 500) {
+        state.lastDangerCheck = now;
+        assessDanger(approachingVehicles);
+      }
+
+      requestAnimationFrame(renderFrame);
+    }
+
+    // ===== Bright-Spot (Headlight) Detection for Night Riding =====
+    // Detects approaching vehicle headlights at night by finding bright blobs
+    // in the lower portion of the frame and tracking their growth (approaching)
+    state.headlightTracks = state.headlightTracks || [];
+
+    function detectHeadlights(videoEl) {
+      // Crop to center-lane area: exclude top 30% (sky) and sides 15% each
+      const cropTopRatio = 0.30;
+      const cropSideRatio = 0.15;
+      const srcY = videoEl.videoHeight * cropTopRatio;
+      const srcH = videoEl.videoHeight - srcY;
+      const srcX = videoEl.videoWidth * cropSideRatio;
+      const srcW = videoEl.videoWidth * (1 - cropSideRatio * 2);
+
+      spotCtx.drawImage(videoEl, srcX, srcY, srcW, srcH, 0, 0, SPOT_W, SPOT_H);
+      const imgData = spotCtx.getImageData(0, 0, SPOT_W, SPOT_H);
+      const data = imgData.data;
+
+      const brightness = new Float32Array(SPOT_W * SPOT_H);
+      let sumB = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        const br = 0.299 * r + 0.587 * g + 0.114 * b;
+        brightness[i / 4] = br;
+        sumB += br;
+      }
+      const avgB = sumB / (SPOT_W * SPOT_H);
+      // Adaptive threshold: lower offset for better sensitivity to distant/dim headlights
+      const threshold = Math.min(210, Math.max(100, avgB + 55));
+      const visited = new Uint8Array(SPOT_W * SPOT_H);
+      const blobs = [];
+
+      const queue = [];
+      for (let y = 0; y < SPOT_H; y++) {
+        for (let x = 0; x < SPOT_W; x++) {
+          const idx = y * SPOT_W + x;
+          if (visited[idx] || brightness[idx] < threshold) continue;
+
+          let minX = x, maxX = x, minY = y, maxY = y;
+          let count = 0;
+          let totalB = 0;
+          queue.length = 0;
+          queue.push(idx);
+          visited[idx] = 1;
+
+          while (queue.length > 0) {
+            const ci = queue.pop();
+            const cx = ci % SPOT_W;
+            const cy = (ci / SPOT_W) | 0;
+
+            count++;
+            totalB += brightness[ci];
+            if (cx < minX) minX = cx;
+            if (cx > maxX) maxX = cx;
+            if (cy < minY) minY = cy;
+            if (cy > maxY) maxY = cy;
+
+            const neighbors = [
+              ci - 1, ci + 1, ci - SPOT_W, ci + SPOT_W
+            ];
+            for (const ni of neighbors) {
+              if (ni < 0 || ni >= SPOT_W * SPOT_H) continue;
+              if (visited[ni]) continue;
+              const nx = ni % SPOT_W;
+              const ny = (ni / SPOT_W) | 0;
+              if (Math.abs(nx - cx) + Math.abs(ny - cy) !== 1) continue;
+              if (brightness[ni] < threshold) continue;
+              visited[ni] = 1;
+              queue.push(ni);
+            }
+          }
+
+          const bw = maxX - minX + 1;
+          const bh = maxY - minY + 1;
+          const area = count;
+          const bboxArea = bw * bh;
+          const fillRatio = area / bboxArea;
+
+          if (area < 2) continue;
+          if (area > SPOT_W * SPOT_H * 0.3) continue;
+          if (bw < 2 || bh < 2) continue;
+          if (fillRatio < 0.12) continue;
+
+          const cx = (minX + maxX) / 2;
+          const cy = (minY + maxY) / 2;
+          if (cy < SPOT_H * 0.05) continue;
+
+          blobs.push({
+            x: cx / SPOT_W,
+            y: cy / SPOT_H,
+            w: bw / SPOT_W,
+            h: bh / SPOT_H,
+            area: area,
+            avgBrightness: totalB / count,
+          });
+        }
+      }
+
+      const now = Date.now();
+      const scaleX = srcW;
+      const scaleY = srcH;
+      const mappedBlobs = blobs.map(b => ({
+        bbox: [b.x * scaleX - b.w * scaleX / 2 + srcX,
+               b.y * scaleY - b.h * scaleY / 2 + srcY,
+               b.w * scaleX,
+               b.h * scaleY],
+        area: b.area,
+        cx: b.x * scaleX + srcX,
+        cy: b.y * scaleY + srcY,
+      }));
+
+      const activeTracks = [];
+      mappedBlobs.forEach(blob => {
+        let bestTrack = null;
+        let bestDist = Infinity;
+        state.headlightTracks.forEach(t => {
+          const dx = t.cx - blob.cx;
+          const dy = t.cy - blob.cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < Math.max(t.w, t.h) * 3 && dist < bestDist) {
+            bestDist = dist;
+            bestTrack = t;
+          }
+        });
+
+        if (bestTrack) {
+          bestTrack.age++;
+          bestTrack.lastSeen = now;
+          bestTrack.missed = 0;
+          const alpha = 0.4;
+          const oldCx = bestTrack.cx;
+          const oldCy = bestTrack.cy;
+          bestTrack.cx = bestTrack.cx * (1 - alpha) + blob.cx * alpha;
+          bestTrack.cy = bestTrack.cy * (1 - alpha) + blob.cy * alpha;
+          bestTrack.w = bestTrack.w * (1 - alpha) + blob.bbox[2] * alpha;
+          bestTrack.h = bestTrack.h * (1 - alpha) + blob.bbox[3] * alpha;
+          // Track total displacement AND vertical direction for motion detection
+          // Approaching vehicles move DOWNWARD in the frame (toward the camera)
+          bestTrack.dyTotal += (bestTrack.cy - oldCy);
+          bestTrack.totalDx += Math.abs(bestTrack.cx - oldCx);
+          bestTrack.totalDy += Math.abs(bestTrack.cy - oldCy);
+          bestTrack.areaHistory.push({ time: now, area: blob.area });
+          if (bestTrack.areaHistory.length > 8) bestTrack.areaHistory.shift();
+
+          if (bestTrack.areaHistory.length >= 3) {
+            // Use recent 3-4 frames for growth rate — more responsive
+            const recent = bestTrack.areaHistory.slice(-4);
+            const first = recent[0].area;
+            const last = recent[recent.length - 1].area;
+            const dt = recent[recent.length - 1].time - recent[0].time;
+            if (first > 0 && dt > 100) {
+              bestTrack.growthRate = (last - first) / first / (dt / 1000);
+            }
+          }
+
+          activeTracks.push(bestTrack);
+        } else {
+          const newTrack = {
+            id: Math.random().toString(36).substr(2, 6),
+            cx: blob.cx,
+            cy: blob.cy,
+            initCx: blob.cx,
+            initCy: blob.cy,
+            w: blob.bbox[2],
+            h: blob.bbox[3],
+            age: 1,
+            missed: 0,
+            lastSeen: now,
+            areaHistory: [{ time: now, area: blob.area }],
+            growthRate: 0,
+            totalDx: 0,
+            totalDy: 0,
+            dyTotal: 0,
+          };
+          state.headlightTracks.push(newTrack);
+          activeTracks.push(newTrack);
+        }
+      });
+
+      state.headlightTracks.forEach(t => {
+        if (!activeTracks.includes(t)) {
+          t.missed++;
+        }
+      });
+      state.headlightTracks = state.headlightTracks.filter(t =>
+        t.missed < 4 && now - t.lastSeen < 800
+      );
+
+      // First collect all valid headlight tracks that meet approach criteria
+      const validTracks = [];
+      state.headlightTracks.forEach(t => {
+        if (t.age < 2) return;
+        if (t.growthRate < 0.08) return;
+        const totalDisp = Math.sqrt(t.totalDx * t.totalDx + t.totalDy * t.totalDy);
+        if (totalDisp < 1) return;
+        if (t.dyTotal < 0.3) return;
+        validTracks.push(t);
+      });
+
+      // Pair headlights that are horizontally close and at similar vertical position
+      // Paired lights = car (dual headlights), single lights = motorcycle/bike
+      const used = new Set();
+      const detections = [];
+
+      for (let i = 0; i < validTracks.length; i++) {
+        if (used.has(i)) continue;
+        const a = validTracks[i];
+        let pairIdx = -1;
+        let bestPairScore = Infinity;
+
+        for (let j = i + 1; j < validTracks.length; j++) {
+          if (used.has(j)) continue;
+          const b = validTracks[j];
+          const dx = Math.abs(a.cx - b.cx);
+          const dy = Math.abs(a.cy - b.cy);
+          const avgSize = (a.w + a.h + b.w + b.h) / 4;
+          // Two headlights should be:
+          // 1. Nearly same height (dy small relative to size)
+          // 2. Horizontally separated (not same light)
+          // 3. Distance between them roughly 1.5-5x the light size
+          if (dy < avgSize * 1.2 && dx > avgSize * 0.8 && dx < avgSize * 6) {
+            const score = dy + Math.abs(dx - avgSize * 3);
+            if (score < bestPairScore) {
+              bestPairScore = score;
+              pairIdx = j;
+            }
+          }
+        }
+
+        if (pairIdx >= 0) {
+          used.add(i);
+          used.add(pairIdx);
+          const b = validTracks[pairIdx];
+          // Merge two headlights into one car detection
+          const minX = Math.min(a.cx - a.w, b.cx - b.w);
+          const maxX = Math.max(a.cx + a.w, b.cx + b.w);
+          const minY = Math.min(a.cy - a.h, b.cy - b.h);
+          const maxY = Math.max(a.cy + a.h, b.cy + b.h);
+          const w = maxX - minX;
+          const h = (maxY - minY) * 1.3;
+          const cx = (minX + maxX) / 2;
+          const cy = (minY + maxY) / 2;
+          const avgGrowth = (a.growthRate + b.growthRate) / 2;
+          const score = Math.min(0.95, 0.55 + Math.min(a.age, b.age, 10) * 0.03 + avgGrowth * 0.2);
+          detections.push({
+            class: 'car',
+            score: score,
+            bbox: [cx - w / 2, cy - h * 0.7, w * 1.2, h],
+            fromHeadlight: true,
+            isApproaching: true,
+            growthRate: avgGrowth,
+          });
+        }
+      }
+
+      // Add remaining unpaired tracks as motorcycles
+      for (let i = 0; i < validTracks.length; i++) {
+        if (used.has(i)) continue;
+        const t = validTracks[i];
+        const w = t.w * 3.0;
+        const h = t.h * 4.0;
+        const x = t.cx - w / 2;
+        const y = t.cy - h * 0.75;
+        const score = Math.min(0.95, 0.5 + Math.min(t.age, 10) * 0.04 + t.growthRate * 0.2);
+        detections.push({
+          class: 'motorcycle',
+          score: score,
+          bbox: [x, y, w, h],
+          fromHeadlight: true,
+          isApproaching: true,
+          growthRate: t.growthRate,
+        });
+      }
+
+      return detections;
+    }
+
+    // ===== Detection Loop (fixed interval, single inference per tick, cross-channel boost) =====
+    function crossChannelBoost(currentPreds, prevPreds, iouThreshold, decayFactor) {
+      if (!prevPreds) return currentPreds;
+      const boosted = currentPreds.map(p => ({ class: p.class, score: p.score, bbox: [...p.bbox] }));
+      prevPreds.forEach(pb => {
+        const pbDecayed = { ...pb, score: pb.score * decayFactor };
+        for (const pa of boosted) {
+          if (pa.class === pbDecayed.class && iou(pa.bbox, pbDecayed.bbox) > iouThreshold) {
+            if (pbDecayed.score > pa.score) {
+              pa.score = pbDecayed.score;
+            }
+            return;
+          }
+        }
+      });
+      return boosted;
+    }
+
+    async function runDetection() {
+      if (state.detectBusy) return;
+      if (!state.isDetecting || !state.model) return;
+      if (!video.videoWidth || !video.videoHeight || video.readyState < 2) return;
+
+      state.detectBusy = true;
+
+      try {
+        const baseThreshold = 0.02;
+        const detectScale = 1.5;
+
+        // Crop to center-lane area: exclude top 20% (sky/horizon) and sides 12% each (road edges)
+        // Wider detection area catches vehicles approaching from slightly behind/side
+        const cropTopRatio = 0.20;
+        const cropSideRatio = 0.12;
+        const cropY = video.videoHeight * cropTopRatio;
+        const cropH = video.videoHeight - cropY;
+        const cropX = video.videoWidth * cropSideRatio;
+        const cropW = video.videoWidth * (1 - cropSideRatio * 2);
+
+        detectCanvas.width = Math.round(cropW * detectScale);
+        detectCanvas.height = Math.round(cropH * detectScale);
+
+        let predictions;
+        const ch = state.detectChannelToggle % 3;
+        if (ch === 0) {
+          // Channel 0: Original frame — no enhancement, for well-lit or normally exposed targets
+          detectCtx.filter = 'none';
+          detectCtx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, detectCanvas.width, detectCanvas.height);
+          predictions = await state.model.detect(detectCanvas, 100, baseThreshold);
+        } else if (ch === 1) {
+          // Channel 1: Gamma mid (0.55) + mild contrast — non-linear shadow boost for dark scenes
+          detectCtx.filter = 'url(#gamma-mid) contrast(1.25)';
+          detectCtx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, detectCanvas.width, detectCanvas.height);
+          predictions = await state.model.detect(detectCanvas, 100, baseThreshold);
+        } else {
+          // Channel 2: HDR tone-mapping — compress bright headlight halos while lifting dark body
+          detectCtx.filter = 'url(#headlight-tone) contrast(1.3)';
+          detectCtx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, detectCanvas.width, detectCanvas.height);
+          predictions = await state.model.detect(detectCanvas, 100, baseThreshold);
+        }
+        detectCtx.filter = 'none';
+
+        const mapScaleX = cropW / detectCanvas.width;
+        const mapScaleY = cropH / detectCanvas.height;
+        predictions.forEach(p => {
+          p.bbox[0] = p.bbox[0] * mapScaleX + cropX;
+          p.bbox[1] = p.bbox[1] * mapScaleY + cropY;
+          p.bbox[2] = p.bbox[2] * mapScaleX;
+          p.bbox[3] = p.bbox[3] * mapScaleY;
+        });
+
+        // Multi-scale detection for small/distant two-wheelers: every 2nd tick,
+        // run an extra 3.5x zoom inference on the lower center area
+        state.multiscaleCounter = (state.multiscaleCounter || 0) + 1;
+        if (state.multiscaleCounter % 2 === 0) {
+          const zoomScale = 3.5;
+          const zoomCropTopRatio = 0.35;
+          const zoomCropSideRatio = 0.15;
+          const zoomCropY = video.videoHeight * zoomCropTopRatio;
+          const zoomCropH = video.videoHeight - zoomCropY;
+          const zoomCropX = video.videoWidth * zoomCropSideRatio;
+          const zoomCropW = video.videoWidth * (1 - zoomCropSideRatio * 2);
+          detectCanvas.width = Math.round(zoomCropW * zoomScale);
+          detectCanvas.height = Math.round(zoomCropH * zoomScale);
+          detectCtx.filter = 'url(#headlight-tone) contrast(1.2)';
+          detectCtx.drawImage(video, zoomCropX, zoomCropY, zoomCropW, zoomCropH, 0, 0, detectCanvas.width, detectCanvas.height);
+          detectCtx.filter = 'none';
+          const zoomPreds = await state.model.detect(detectCanvas, 50, baseThreshold);
+          const zoomScaleX = zoomCropW / detectCanvas.width;
+          const zoomScaleY = zoomCropH / detectCanvas.height;
+          zoomPreds.forEach(p => {
+            p.bbox[0] = p.bbox[0] * zoomScaleX + zoomCropX;
+            p.bbox[1] = p.bbox[1] * zoomScaleY + zoomCropY;
+            p.bbox[2] = p.bbox[2] * zoomScaleX;
+            p.bbox[3] = p.bbox[3] * zoomScaleY;
+          });
+          // Merge zoom predictions with main predictions (NMS by class+IoU)
+          const merged = [...predictions];
+          zoomPreds.forEach(zp => {
+            let dup = false;
+            for (const mp of merged) {
+              if (mp.class === zp.class && iou(mp.bbox, zp.bbox) > 0.3) {
+                if (zp.score > mp.score) {
+                  mp.score = zp.score;
+                  mp.bbox = [...zp.bbox];
+                }
+                dup = true;
+                break;
+              }
+            }
+            if (!dup) merged.push(zp);
+          });
+          predictions = merged;
+        }
+
+        // Run headlight (bright-spot) detection every frame — low res, fast, supplements COCO-SSD
+        try {
+          const headlightDets = detectHeadlights(video);
+          if (headlightDets.length > 0) {
+            const merged2 = [...predictions];
+            headlightDets.forEach(hd => {
+              let dup = false;
+              for (const mp of merged2) {
+                if (mp.class === hd.class && iou(mp.bbox, hd.bbox) > 0.2) {
+                  if (hd.score > mp.score) {
+                    mp.score = hd.score;
+                    mp.bbox = [...hd.bbox];
+                  }
+                  dup = true;
+                  break;
+                }
+              }
+              if (!dup) merged2.push(hd);
+            });
+            predictions = merged2;
+          }
+        } catch (e) {
+          // Headlight detection may fail on CORS-restricted videos; ignore gracefully
+        }
+
+        predictions = crossChannelBoost(predictions, state.prevChannelPredictions, 0.5, 0.7);
+
+        state.prevChannelPredictions = predictions.map(p => ({
+          class: p.class,
+          score: p.score,
+          bbox: [...p.bbox],
+        }));
+
+        let vehicles = predictions.filter(p => {
+          if (!TARGET_CLASSES.includes(p.class)) return false;
+          const cls = COCO_CLASSES[p.class];
+          if (!cls) return false;
+
+          const isTwoWheeler = p.class === 'bicycle' || p.class === 'motorcycle';
+          if (isTwoWheeler) {
+            const w = p.bbox[2];
+            const h = p.bbox[3];
+            const aspect = h / w;
+            if (aspect < 0.25 || aspect > 4.0) return false;
+            if (w * h < 40) return false;
+          }
+
+          const sensitivityAdjust = (50 - settings.sensitivity) / 100 * 0.15;
+          const adjustedThreshold = Math.max(0.02, cls.threshold + sensitivityAdjust);
+          return p.score >= adjustedThreshold;
+        });
+
+        // Post-classification correction based on bbox geometry:
+        // Cars are WIDE (w/h > 1.3), two-wheelers are TALL/NARROW (h/w > 0.8 typically)
+        // This fixes COCO-SSD misclassifying cars as motorcycles at night/low-res
+        vehicles = vehicles.map(p => {
+          const w = p.bbox[2];
+          const h = p.bbox[3];
+          const aspectWH = w / h;
+          const area = w * h;
+          // Wide bbox labeled as two-wheeler → likely a car
+          if ((p.class === 'motorcycle' || p.class === 'bicycle') && aspectWH > 1.4 && area > 5000) {
+            return { ...p, class: 'car', score: Math.max(p.score, 0.2) };
+          }
+          // Very tall narrow bbox labeled as car → likely a motorcycle
+          if (p.class === 'car' && h / w > 1.8 && area < 8000) {
+            return { ...p, class: 'motorcycle', score: Math.max(p.score, 0.15) };
+          }
+          return p;
+        });
+
+        vehicles = smoothDetections(vehicles, video.videoHeight);
+        state.lastPredictions = vehicles;
+        state.detectChannelToggle = (state.detectChannelToggle || 0) + 1;
+
+      } catch (err) {
+        console.error('Detection error:', err);
+      } finally {
+        state.detectBusy = false;
+      }
+    }
+
+    // ===== Danger Assessment =====
+    function assessDanger(vehicles) {
+      const now = Date.now();
+      const frameArea = video.videoWidth * video.videoHeight;
+
+      let maxAreaRatio = 0;
+      let maxGrowth = 0;
+      let hasTwoWheeler = false;
+      let twoWheelerAreaRatio = 0;
+      let twoWheelerGrowth = 0;
+
+      vehicles.forEach(v => {
+        const area = v.bbox[2] * v.bbox[3];
+        const ratio = area / frameArea;
+        const isTwoWheeler = v.class === 'bicycle' || v.class === 'motorcycle';
+
+        if (ratio > maxAreaRatio) maxAreaRatio = ratio;
+        if (v.growthRate > maxGrowth) maxGrowth = v.growthRate;
+
+        if (isTwoWheeler) {
+          hasTwoWheeler = true;
+          if (ratio > twoWheelerAreaRatio) twoWheelerAreaRatio = ratio;
+          if (v.growthRate > twoWheelerGrowth) twoWheelerGrowth = v.growthRate;
+        }
+      });
+
+      let level = 'safe';
+
+      if (hasTwoWheeler) {
+        if (twoWheelerAreaRatio > 0.08) {
+          level = 'danger';
+        } else if (twoWheelerAreaRatio > 0.03) {
+          if (twoWheelerGrowth > 0.08) {
+            level = 'danger';
+          } else {
+            level = 'attention';
+          }
+        } else if (twoWheelerAreaRatio > 0.01 && twoWheelerGrowth > 0.04) {
+          level = 'attention';
+        }
+      }
+
+      if (level === 'safe') {
+        if (maxAreaRatio > 0.15) {
+          level = 'danger';
+        } else if (maxAreaRatio > 0.06) {
+          if (maxGrowth > 0.15) {
+            level = 'danger';
+          } else {
+            level = 'attention';
+          }
+        } else if (maxAreaRatio > 0.02 && maxGrowth > 0.08) {
+          level = 'attention';
+        }
+      }
+
+      // 始终更新状态显示
+      updateStatus(level);
+
+      // 只有骑行时才触发预警（语音+闪光+记录）
+      if (state.isRiding && level !== 'safe') {
+        const cooldownPassed = (now - state.lastAlertTime) > settings.cooldown * 1000;
+        const levelChanged = level !== state.lastAlertLevel;
+        if (cooldownPassed || levelChanged) {
+          triggerAlert(level);
+          state.lastAlertLevel = level;
+          state.lastAlertTime = now;
+        }
+      }
+
+      if (level === 'safe') {
+        state.lastAlertLevel = null;
+      }
+    }
+
+    // ===== Status Update =====
+    function updateStatus(level) {
+      const statusMap = {
+        safe: { text: '安全', class: 'status-safe', valueClass: 'safe', value: '安全' },
+        attention: { text: '注意', class: 'status-warn', valueClass: 'warn', value: '注意' },
+        danger: { text: '危险', class: 'status-danger', valueClass: 'danger', value: '危险' },
+      };
+
+      const info = statusMap[level];
+      statusBadge.className = 'status-badge ' + info.class;
+      statusText.textContent = info.text;
+      currentStatusValue.className = 'stat-value ' + info.valueClass;
+      currentStatusValue.textContent = info.value;
+
+      if (state.isRiding) {
+        recDot.classList.add('recording');
+      } else {
+        recDot.classList.remove('recording');
+      }
+
+      // 安全时延迟停止闪光
+      if (level === 'safe' && state.flashActive) {
+        scheduleFlashStop();
+      }
+    }
+
+    // ===== Alert =====
+    function triggerAlert(level) {
+      const now = Date.now();
+      state.totalAlertCount++;
+      if (level === 'danger') state.dangerAlertCount++;
+
+      // Update UI
+      alertCountValue.textContent = state.totalAlertCount;
+      lastAlertTime.textContent = formatTime(now);
+      updateSafetyScore();
+
+      // Voice alert
+      if (state.voiceEnabled) {
+        speak(level);
+      }
+
+      // Flash alert
+      if (state.flashEnabled && settings.flashMode !== 'off') {
+        if (settings.flashMode === 'all' || (settings.flashMode === 'danger' && level === 'danger')) {
+          triggerFlash(level);
+        }
+      }
+
+      // Save alert
+      state.alerts.push({
+        time: now,
+        level,
+        type: 'vehicle'
+      });
+    }
+
+    function speak(level) {
+      if (!('speechSynthesis' in window)) {
+        return;
+      }
+
+      try {
+        speechSynthesis.cancel();
+
+        const lang = settings.language;
+        const texts = {
+          'zh-CN': {
+            attention: '注意，后方来车',
+            danger: '危险！后方车辆正在接近，请注意安全',
+          },
+          'en-US': {
+            attention: 'Warning, vehicle approaching',
+            danger: 'Danger! Vehicle approaching, please be careful',
+          },
+        };
+
+        const text = (texts[lang] && texts[lang][level]) || texts['zh-CN'][level];
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
+        utterance.volume = Math.max(0.3, settings.volume / 100);
+        utterance.rate = 1.1;
+        utterance.pitch = 1.0;
+
+        utterance.onerror = (e) => {
+          if (e.error !== 'interrupted' && e.error !== 'canceled' && e.error !== 'aborted') {
+            console.log('语音错误 (可忽略):', e.error);
+          }
+        };
+
+        speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.log('语音播放异常 (可忽略)');
+      }
+    }
+
+    function triggerFlash(level) {
+      // 清除停止定时器
+      if (state.flashStopTimer) {
+        clearTimeout(state.flashStopTimer);
+        state.flashStopTimer = null;
+      }
+
+      state.flashActive = true;
+      const speed = level === 'danger' ? 'flash-fast' : 'flash-slow';
+      const duration = level === 'danger' ? 2000 : 3000;
+
+      flashOverlay.classList.remove('flash-slow', 'flash-fast');
+      void flashOverlay.offsetWidth;
+      flashOverlay.classList.add(speed);
+
+      // 动画结束后移除class
+      setTimeout(() => {
+        if (state.flashActive && !state.flashStopTimer) {
+          flashOverlay.classList.remove('flash-slow', 'flash-fast');
+        }
+      }, duration);
+    }
+
+    function scheduleFlashStop() {
+      if (state.flashStopTimer) return;
+      state.flashStopTimer = setTimeout(() => {
+        stopFlash();
+        state.flashStopTimer = null;
+      }, 3000); // 预警解除后3秒停止
+    }
+
+    function stopFlash(immediate) {
+      if (state.flashStopTimer) {
+        clearTimeout(state.flashStopTimer);
+        state.flashStopTimer = null;
+      }
+      if (immediate) {
+        flashOverlay.classList.remove('flash-slow', 'flash-fast');
+      }
+      state.flashActive = false;
+    }
+
+    function updateSafetyScore() {
+      let score = 'S';
+      if (state.dangerAlertCount === 0) {
+        score = 'S';
+      } else if (state.dangerAlertCount <= 2) {
+        score = 'A';
+      } else if (state.dangerAlertCount <= 5) {
+        score = 'B';
+      } else {
+        score = 'C';
+      }
+      safetyScoreValue.textContent = score;
+      safetyScoreValue.className = 'stat-value ' + score.toLowerCase();
+    }
+
+    // ===== Ride Control =====
+    startRideBtn.addEventListener('click', () => {
+      if (state.isRiding) {
+        endRide();
+      } else {
+        startRide();
+      }
+    });
+
+    function startRide() {
+      if (!state.isModelLoaded) {
+        showToast('⏳ 模型正在加载中，请稍候');
+        return;
+      }
+      if (!state.isDetecting) {
+        showToast('请先开启摄像头或上传视频');
+        return;
+      }
+
+      state.isRiding = true;
+      state.rideStartTime = Date.now();
+      state.alerts = [];
+      state.dangerAlertCount = 0;
+      state.totalAlertCount = 0;
+      state.lastAlertTime = 0;
+      state.lastAlertLevel = null;
+
+      // 骑行开始时，语音和闪光自动进入待命状态
+      state.voiceEnabled = true;
+      state.flashEnabled = settings.flashMode !== 'off';
+
+      startRideBtn.innerHTML = '结束骑行';
+      startRideBtn.classList.add('active');
+      recDot.classList.add('recording');
+      rideTimer.classList.add('show');
+
+      alertCountValue.textContent = '0';
+      updateSafetyScore();
+
+      // Start timer
+      state.rideTimerInterval = setInterval(() => {
+        const elapsed = Date.now() - state.rideStartTime;
+        rideTimer.textContent = formatDuration(elapsed);
+      }, 1000);
+
+      showToast('骑行开始，注意安全！');
+    }
+
+    function endRide() {
+      state.isRiding = false;
+
+      // 骑行结束时，关闭语音和闪光
+      state.voiceEnabled = false;
+      state.flashEnabled = false;
+
+      startRideBtn.innerHTML = '开始骑行';
+      startRideBtn.classList.remove('active');
+      recDot.classList.remove('recording');
+      rideTimer.classList.remove('show');
+
+      if (state.rideTimerInterval) {
+        clearInterval(state.rideTimerInterval);
+        state.rideTimerInterval = null;
+      }
+
+      stopFlash(true);
+      updateStatus('safe');
+
+      // Save ride
+      if (state.rideStartTime) {
+        const duration = Date.now() - state.rideStartTime;
+        const ride = {
+          date: new Date().toLocaleString('zh-CN'),
+          duration,
+          alertCount: state.totalAlertCount,
+          dangerCount: state.dangerAlertCount,
+          score: safetyScoreValue.textContent,
+          alerts: [...state.alerts]
+        };
+        state.rideHistory.unshift(ride);
+        if (state.rideHistory.length > 20) state.rideHistory.pop();
+        localStorage.setItem('rideHistory', JSON.stringify(state.rideHistory));
+        renderRideHistory();
+      }
+
+      showToast('✅ 骑行已结束');
+    }
+
+    function renderRideHistory() {
+      if (state.rideHistory.length === 0) {
+        rideHistoryEl.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted);font-size:0.8rem;">暂无骑行记录</div>';
+        return;
+      }
+
+      rideHistoryEl.innerHTML = state.rideHistory.slice(0, 10).map(ride => `
+        <div class="ride-item">
+          <div>
+            <div class="ride-date">${ride.date.split(' ')[0]}</div>
+            <div class="ride-meta">${formatDuration(ride.duration)} | ${ride.alertCount}次预警</div>
+          </div>
+          <div class="ride-score ${ride.score.toLowerCase()}">${ride.score}</div>
+        </div>
+      `).join('');
+    }
+
+    // ===== Window Events =====
+    window.addEventListener('resize', () => {
+      if (video.videoWidth) resizeCanvas();
+    });
+
+    // 页面卸载时清理
+    window.addEventListener('beforeunload', () => {
+      if (state.isDetecting) stopDetection();
+      speechSynthesis.cancel();
+      if (state.currentBlobUrl) {
+        URL.revokeObjectURL(state.currentBlobUrl);
+        state.currentBlobUrl = null;
+      }
+    });
+
+    // ===== Initialize =====
+    function init() {
+      initSettings();
+      renderRideHistory();
+      updateStatus('safe');
+      loadModel();
+    }
+
+    init();
+  </script>
+</body>
+</html>
+
